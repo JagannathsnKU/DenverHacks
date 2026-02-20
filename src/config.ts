@@ -36,7 +36,7 @@ const configSchema = z.object({
   HEDERA_NETWORK: z.enum(["mainnet", "testnet", "previewnet"]).default("testnet"),
   HEDERA_ACCOUNT_ID: z.string().regex(/^0\.0\.\d+$/),
   HEDERA_PRIVATE_KEY: z.string(),
-  HEDERA_AGENT_TOKEN_ID: z.string().regex(/^0\.0\.\d+$/),
+  HEDERA_AGENT_TOKEN_ID: z.string().regex(/^0\.0\.\d+$/).optional(),
   HEDERA_UCP_REGISTRY_TOPIC: z.string().regex(/^0\.0\.\d+$/).optional(),
 });
 

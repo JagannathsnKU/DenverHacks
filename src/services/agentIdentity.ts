@@ -70,16 +70,20 @@ export async function createAgent(
 
       logger.info({ agentId, hederaAccountId }, "Hedera account created");
 
-      // Associate AGENT token with new account
+      // Associate AGENT token with new account (skip if token not configured)
       const agentTokenId = getAgentTokenId();
-      const tokenAssociateTx = await new TokenAssociateTransaction()
-        .setAccountId(hederaAccountId)
-        .setTokenIds([agentTokenId])
-        .freezeWith(hederaClient)
-        .sign(operatorPrivateKey);
+      if (agentTokenId) {
+        const tokenAssociateTx = await new TokenAssociateTransaction()
+          .setAccountId(hederaAccountId)
+          .setTokenIds([agentTokenId])
+          .freezeWith(hederaClient)
+          .sign(operatorPrivateKey);
 
-      await tokenAssociateTx.execute(hederaClient);
-      logger.info({ hederaAccountId, agentTokenId }, "Agent token associated");
+        await tokenAssociateTx.execute(hederaClient);
+        logger.info({ hederaAccountId, agentTokenId }, "Agent token associated");
+      } else {
+        logger.warn("HEDERA_AGENT_TOKEN_ID not set - skipping token association");
+      }
 
       // Create HCS topic for agent attestations
       hcsTopicId = await createAgentTopic(agentId);

@@ -5,21 +5,21 @@ import { config } from "@/config";
 // Define custom chains for Kite AI and 0G since they're not in viem's default chain list
 export const kiteTestnet = {
   id: config.KITE_CHAIN_ID,
-  name: "Kite AI Testnet",
+  name: "KiteAI Testnet",
   network: "kiteTestnet",
-  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+  nativeCurrency: { name: "KITE", symbol: "KITE", decimals: 18 },
   rpcUrls: { default: { http: [config.KITE_RPC_URL] }, public: { http: [config.KITE_RPC_URL] } },
-  blockExplorers: { default: { name: "Explorer", url: "" } },
+  blockExplorers: { default: { name: "Kitescan", url: "https://testnet.kitescan.ai" } },
   testnet: true,
 };
 
 export const zgTestnet = {
   id: config.ZG_CHAIN_ID,
-  name: "0G Testnet",
+  name: "0G-Galileo-Testnet",
   network: "zgTestnet",
-  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+  nativeCurrency: { name: "0G", symbol: "0G", decimals: 18 },
   rpcUrls: { default: { http: [config.ZG_RPC_URL] }, public: { http: [config.ZG_RPC_URL] } },
-  blockExplorers: { default: { name: "Explorer", url: "" } },
+  blockExplorers: { default: { name: "Galileo Explorer", url: "https://chainscan-galileo.0g.ai" } },
   testnet: true,
 };
 

@@ -24,6 +24,36 @@ const toolIdParamSchema = z.object({
 });
 
 /**
+ * GET /api/tools
+ * List all registered tools
+ */
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const tools = await prisma.tool.findMany({
+      where: { active: true },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        endpointUrl: true,
+        priceWei: true,
+        authType: true,
+        ownerWallet: true,
+        onChainId: true,
+        active: true,
+        createdAt: true,
+        _count: { select: { executions: true } },
+      },
+    });
+    res.json(tools);
+  } catch (error) {
+    throw error;
+  }
+});
+
+/**
  * POST /api/tools
  * Register a new tool with OpenAPI spec
  */

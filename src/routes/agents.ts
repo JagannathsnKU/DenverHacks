@@ -16,6 +16,33 @@ const agentIdParamSchema = z.object({
 });
 
 /**
+ * GET /api/agents
+ * List all registered agents
+ */
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const agents = await prisma.agent.findMany({
+      where: { active: true },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        agentId: true,
+        name: true,
+        wallet: true,
+        reputationScore: true,
+        hcsTopicId: true,
+        nftTokenId: true,
+        createdAt: true,
+      },
+    });
+    res.json(agents);
+  } catch (error) {
+    throw error;
+  }
+});
+
+/**
  * POST /api/agents
  * Create a new agent with on-chain identity
  */

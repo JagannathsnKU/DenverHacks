@@ -4,7 +4,7 @@ import {
   TopicMessageQuery,
   PrivateKey,
 } from "@hashgraph/sdk";
-import { getHederaClient, getOperatorPrivateKey } from "./client";
+import { getHederaClient, getOperatorPrivateKey, parsePrivateKey } from "./client";
 import type { AgentAttestation } from "@/types/hedera";
 import { AppError } from "@/types/errors";
 import pino from "pino";
@@ -24,7 +24,7 @@ export interface HCSAttestationResponse {
 export async function createAgentTopic(agentId: string): Promise<string> {
   try {
     const client = getHederaClient();
-    const operatorPrivateKey = PrivateKey.fromStringDer(getOperatorPrivateKey());
+    const operatorPrivateKey = parsePrivateKey(getOperatorPrivateKey());
 
     const transaction = await new TopicCreateTransaction()
       .setTopicMemo(`agent-attestations:${agentId}`)
@@ -62,7 +62,7 @@ export async function submitAttestation(
 ): Promise<HCSAttestationResponse> {
   try {
     const client = getHederaClient();
-    const operatorPrivateKey = PrivateKey.fromStringDer(getOperatorPrivateKey());
+    const operatorPrivateKey = parsePrivateKey(getOperatorPrivateKey());
 
     const payload = JSON.stringify(attestation);
 

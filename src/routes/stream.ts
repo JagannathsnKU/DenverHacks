@@ -14,10 +14,15 @@ redis.on("error", () => {}); // Suppress errors
  * Server-Sent Events endpoint for real-time agent activity streaming
  * Connects to Redis pub/sub and pushes events to observer dashboard
  */
-router.get("/", (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     const pubsub = new Redis(config.REDIS_URL, { lazyConnect: true });
     pubsub.on("error", () => {}); // Suppress errors
+
+    // Must connect before subscribe when lazyConnect is true
+    await pubsub.connect().catch(() => {
+      logger.warn("Redis pubsub connect failed — stream will be silent");
+    });
 
     // Set headers for SSE
     res.setHeader("Content-Type", "text/event-stream");

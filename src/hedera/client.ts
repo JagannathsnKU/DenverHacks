@@ -10,9 +10,14 @@ export function initializeHederaClient(): Client {
   if (hederaClient) return hederaClient;
 
   try {
-    // Hedera Client.forNetwork() expects a network name string like "mainnet" or "testnet"
-    const networkName = config.HEDERA_NETWORK === "mainnet" ? "mainnet" : "testnet";
-    hederaClient = Client.forNetwork({ [networkName]: networkName }) as any;
+    // Use the correct Hedera SDK static methods for standard networks
+    if (config.HEDERA_NETWORK === "mainnet") {
+      hederaClient = Client.forMainnet();
+    } else if (config.HEDERA_NETWORK === "previewnet") {
+      hederaClient = Client.forPreviewnet();
+    } else {
+      hederaClient = Client.forTestnet();
+    }
 
     if (!hederaClient) {
       throw new Error("Failed to create Hedera client");
@@ -35,7 +40,7 @@ export function initializeHederaClient(): Client {
     logger.info(
       {
         operatorId: config.HEDERA_ACCOUNT_ID,
-        network: networkName,
+        network: config.HEDERA_NETWORK,
       },
       "Hedera client initialized"
     );
@@ -43,10 +48,7 @@ export function initializeHederaClient(): Client {
     return hederaClient!;
   } catch (error) {
     logger.error({ error }, "Failed to initialize Hedera client");
-    // Return a dummy client that won't crash the server
-    const networkName = config.HEDERA_NETWORK === "mainnet" ? "mainnet" : "testnet";
-    hederaClient = Client.forNetwork({ [networkName]: networkName }) as any;
-    return hederaClient!;
+    throw error;
   }
 }
 
@@ -73,8 +75,20 @@ export function getOperatorPrivateKey(): string {
   return config.HEDERA_PRIVATE_KEY;
 }
 
-export function getAgentTokenId(): string {
+export function getAgentTokenId(): string | undefined {
   return config.HEDERA_AGENT_TOKEN_ID;
+}
+
+/**
+ * Robustly parse any Hedera private key string (DER, hex, or 0x-prefixed hex)
+ */
+export function parsePrivateKey(raw: string): PrivateKey {
+  try {
+    return PrivateKey.fromStringDer(raw);
+  } catch {
+    const hex = raw.replace(/^0x/, "");
+    return PrivateKey.fromString(hex);
+  }
 }
 
 export function getUCPRegistryTopic(): string | undefined {

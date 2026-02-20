@@ -6,7 +6,7 @@ import pino from "pino";
 
 const logger = pino();
 const router = Router();
-const redis = new Redis(config.REDIS_URL, { lazyConnect: true });
+const redis = new Redis(config.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 0 });
 redis.on("error", () => {}); // Suppress errors
 
 /**
@@ -15,8 +15,12 @@ redis.on("error", () => {}); // Suppress errors
  */
 router.get("/leaderboard", async (req: Request, res: Response) => {
   try {
-    // Check cache first
-    const cached = await redis.get("leaderboard:cache");
+    // Check cache first — fail fast if Redis not ready
+    let cached: string | null = null;
+    try {
+      cached = await redis.get("leaderboard:cache");
+    } catch { /* cache miss, continue to DB */ }
+
     if (cached) {
       return res.json(JSON.parse(cached));
     }
@@ -41,12 +45,10 @@ router.get("/leaderboard", async (req: Request, res: Response) => {
       ...agent,
     }));
 
-    // Cache for 5 minutes
-    await redis.setex(
-      "leaderboard:cache",
-      300,
-      JSON.stringify(leaderboard)
-    );
+    // Cache for 5 minutes — best effort
+    try {
+      await redis.setex("leaderboard:cache", 300, JSON.stringify(leaderboard));
+    } catch { /* cache write not critical */ }
 
     res.json(leaderboard);
   } catch (error) {

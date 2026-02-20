@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
 import pinoHttp from "pino-http";
 import { config } from "@/config";
 import { healthCheck, getClientForChain } from "@/blockchain/clients";
@@ -25,6 +26,15 @@ const logger = pino();
 const app = express();
 
 // Middleware
+app.use(
+  cors({
+    origin: true, // reflect request origin — tighten to your frontend URL in production
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-wallet", "x-payment-chain", "x-payment"],
+    credentials: true,
+  })
+);
+// note: cors() middleware above already handles OPTIONS pre-flight automatically
 app.use(express.json());
 app.use(pinoHttp());
 

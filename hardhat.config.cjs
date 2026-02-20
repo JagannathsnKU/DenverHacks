@@ -1,9 +1,8 @@
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-viem";
-import "@nomicfoundation/hardhat-verify";
-import "dotenv/config";
+require("dotenv/config");
+require("@nomicfoundation/hardhat-viem");
 
-const config: HardhatUserConfig = {
+/** @type {import('hardhat/config').HardhatUserConfig} */
+const config = {
   solidity: {
     version: "0.8.24",
     settings: {
@@ -11,6 +10,7 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200,
       },
+      viaIR: true,
     },
   },
   networks: {
@@ -30,19 +30,11 @@ const config: HardhatUserConfig = {
       chainId: Number(process.env.ZG_CHAIN_ID) || 16602,
     },
   },
-  etherscan: {
-    apiKey: {
-      baseSepolia: process.env.BASESCAN_API_KEY || "",
-      kiteTestnet: process.env.KITE_EXPLORER_API_KEY || "",
-      zgTestnet: process.env.ZG_EXPLORER_API_KEY || "",
-    },
-  },
   paths: {
     sources: "./contracts",
-    tests: "./test",
     cache: "./.hardhat/cache",
     artifacts: "./.hardhat/artifacts",
   },
 };
 
-export default config;
+module.exports = config;
