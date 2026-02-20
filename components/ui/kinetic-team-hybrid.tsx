@@ -1,64 +1,29 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   motion,
   useMotionValue,
   useSpring,
   AnimatePresence,
 } from 'framer-motion';
-import { ArrowUpRight, Minus, Plus } from 'lucide-react';
+import { ArrowUpRight, Plus } from 'lucide-react';
 import Image from 'next/image';
+import { AGENTS, type Agent } from '@/lib/agents';
 
-/* ---------- Types ---------- */
-
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  image: string;
-}
-
-/* ---------- Data ---------- */
-
-const TEAM: TeamMember[] = [
-  {
-    id: '01',
-    name: 'Neural Core',
-    role: 'AI Architect',
-    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1000&auto=format&fit=crop',
-  },
-  {
-    id: '02',
-    name: 'Quantum Mind',
-    role: 'Machine Learning Engineer',
-    image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop',
-  },
-  {
-    id: '03',
-    name: 'Cyber Vision',
-    role: 'Computer Vision Specialist',
-    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1000&auto=format&fit=crop',
-  },
-  {
-    id: '04',
-    name: 'Data Nexus',
-    role: 'Data Scientist',
-    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1000&auto=format&fit=crop',
-  },
-  {
-    id: '05',
-    name: 'Synapse AI',
-    role: 'Neural Network Researcher',
-    image: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?q=80&w=1000&auto=format&fit=crop',
-  },
-];
+const TEAM = AGENTS;
 
 /* ---------- Main Component ---------- */
 
 export default function KineticTeamHybrid() {
+  const router = useRouter();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleAgentClick = (id: string) => {
+    router.push(`/demo/agent/${id}`);
+  };
 
   // Mouse position resources (Global for the floating card)
   const mouseX = useMotionValue(0);
@@ -123,6 +88,7 @@ export default function KineticTeamHybrid() {
               setActiveId={setActiveId}
               isMobile={isMobile}
               isAnyActive={activeId !== null}
+              onSelectAgent={handleAgentClick}
             />
           ))}
         </div>
@@ -153,7 +119,7 @@ export default function KineticTeamHybrid() {
                 />
                 
                 {/* Overlay Metadata */}
-                <div className="absolute bottom-0 w-full bg-linear-to-t from-black/80 to-transparent p-4">
+                <div className="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4">
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                     <span className="text-[10px] uppercase tracking-widest text-white/80">Active</span>
@@ -177,19 +143,21 @@ function TeamRow({
   setActiveId,
   isMobile,
   isAnyActive,
+  onSelectAgent,
 }: {
-  data: TeamMember;
+  data: Agent;
   index: number;
   isActive: boolean;
   setActiveId: (id: string | null) => void;
   isMobile: boolean;
   isAnyActive: boolean;
+  onSelectAgent: (id: string) => void;
 }) {
   const isDimmed = isAnyActive && !isActive;
 
   return (
     <motion.div
-      layout // This enables smooth height animation on mobile
+      layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ 
         opacity: isDimmed ? 0.3 : 1, 
@@ -199,10 +167,8 @@ function TeamRow({
       transition={{ duration: 0.4, delay: index * 0.05 }}
       onMouseEnter={() => !isMobile && setActiveId(data.id)}
       onMouseLeave={() => !isMobile && setActiveId(null)}
-      onClick={() => isMobile && setActiveId(isActive ? null : data.id)}
-      className={`group relative border-t border-neutral-900 transition-colors duration-500 last:border-b ${
-        isMobile ? 'cursor-pointer' : 'cursor-default'
-      }`}
+      onClick={() => onSelectAgent(data.id)}
+      className="group relative border-t border-neutral-900 transition-colors duration-500 last:border-b cursor-pointer"
     >
       <div className="relative z-10 flex flex-col py-8 md:flex-row md:items-center md:justify-between md:py-12">
         
@@ -222,9 +188,9 @@ function TeamRow({
             {data.role}
           </span>
           
-          {/* Mobile Toggle Icon */}
+          {/* Mobile: hint to tap */}
           <div className="block md:hidden text-neutral-500">
-            {isActive ? <Minus size={18} /> : <Plus size={18} />}
+            <Plus size={18} />
           </div>
 
           {/* Desktop Arrow */}
@@ -236,34 +202,6 @@ function TeamRow({
           </motion.div>
         </div>
       </div>
-
-      {/* MOBILE ONLY: Inline Accordion Image */}
-      <AnimatePresence>
-        {isMobile && isActive && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden bg-neutral-900/50"
-          >
-            <div className="p-4">
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                <Image 
-                  src={data.image} 
-                  alt={data.name} 
-                                  className="h-full w-full object-cover" 
-                                  fill
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-4 left-4">
-                   <p className="text-xs uppercase tracking-widest text-white">View Profile</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }
