@@ -114,11 +114,11 @@ export default function KineticTeamHybrid() {
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 className="relative h-64 w-80 overflow-hidden rounded-xl border border-red-500/30 bg-black shadow-2xl shadow-red-500/20"
               >
-                {/* Find the active image */}
+                {/* Active team member image */}
                 <Image
                   src={TEAM.find((t) => t.id === activeId)?.image || '/placeholder.png'}
-                                  alt="Preview"
-                                  fill
+                  alt="Preview"
+                  fill
                   className="h-full w-full object-cover"
                 />
                 
