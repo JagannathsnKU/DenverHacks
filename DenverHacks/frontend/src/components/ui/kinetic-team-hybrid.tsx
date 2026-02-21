@@ -116,7 +116,7 @@ export default function KineticTeamHybrid() {
               >
                 {/* Find the active image */}
                 <Image
-                  src={TEAM.find((t) => t.id === activeId)?.image}
+                  src={TEAM.find((t) => t.id === activeId)?.image || '/placeholder.png'}
                                   alt="Preview"
                                   fill
                   className="h-full w-full object-cover"
